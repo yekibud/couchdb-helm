@@ -82,6 +82,19 @@ spec:
             - name: metrics
               containerPort: {{ .Values.prometheusPort.port }}
 {{- end }}
+          lifecycle:
+            postStart:
+              exec:
+                command:
+                  - "/bin/sh"
+                  - "-c"
+                  - >
+                    sleep 10 &&
+                    COUCHDB_URL=$COUCHDB_USER:$COUCHDB_PASSWORD@localhost:5984 &&
+                    curl -X POST $COUCHDB_URL/_cluster_setup -H "Content-Type: application/json" -d '{"action": "finish_cluster"}' &&
+                    curl -X PUT $COUCHDB_URL/_global_changes &&
+                    curl -X PUT $COUCHDB_URL/_users &&
+                    curl -X PUT $COUCHDB_URL/_replicator
           env:
 {{- if not .Values.allowAdminParty }}
             - name: COUCHDB_USER
