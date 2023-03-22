@@ -91,6 +91,9 @@ spec:
                   - >
                     sleep 10 &&
                     COUCHDB_URL=$COUCHDB_USER:$COUCHDB_PASSWORD@localhost:5984 &&
+                    {{- range .Values.sentinelAdmins }}
+                    curl -X PUT $COUCHDB_URL/_node/_local/_config/admins/${{ "{" }}{{ .username }}Username{{ "}" }} -d "\"${{ "{" }}{{ .username }}Password{{ "}" }}\"" &&
+                    {{- end }}
                     curl -X POST $COUCHDB_URL/_cluster_setup -H "Content-Type: application/json" -d '{"action": "finish_cluster"}' &&
                     curl -X PUT $COUCHDB_URL/_global_changes &&
                     curl -X PUT $COUCHDB_URL/_users &&
